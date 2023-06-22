@@ -1,0 +1,117 @@
+
+services:
+  namenode:
+    image: hadoop_spark
+    container_name: namenode
+    ports:
+      - 9870:9870 # namenode web UI
+      - 4040:4040 # spark-shell UI
+    volumes:
+      - ./init/core-site.xml:/etc/hadoop/core-site.xml
+      - ./init/yarn-site.xml:/etc/hadoop/yarn-site.xml
+      - ./volume/namenode_name:/opt/hadoop/dfs/name # namenode data mount
+      - ./volume/namenode_spark_eventLog:/opt/spark/eventLog # spark history log data mount 
+      - ./volume/namenode_hadoop_timeline:/opt/hadoop/yarn/timeline # yarn timeline data mount
+    # command: 
+    #   - /bin/bash
+    #   - -c
+    #   - |
+    #     if test -f "$NAMENODE_VERSION"; then
+    #         echo "$NAMENODE_VERSION exists."
+    #     else
+    #         echo "$NAMENODE_VERSION dosen't exists."
+    #         echo 'Y' | hdfs namenode -format
+    #     fi
+    #     hdfs --config /etc/hadoop namenode
+
+  # ==============================================================================
+    
+  datanode01:
+    image: hadoop_spark
+    container_name: datanode01
+    volumes:
+      - ./init/core-site.xml:/etc/hadoop/core-site.xml
+      - ./init/yarn-site.xml:/etc/hadoop/yarn-site.xml
+      - ./volume/datanode01_data:/opt/hadoop/dfs/data
+      - ./volume/datanode01_yarn:/opt/hadoop/yarn/data
+    command: ["hdfs", "--config", "/etc/hadoop", "datanode"]
+    
+  datanode02:
+    image: hadoop_spark
+    container_name: datanode02
+    volumes:
+      - ./init/core-site.xml:/etc/hadoop/core-site.xml
+      - ./init/yarn-site.xml:/etc/hadoop/yarn-site.xml
+      - ./volume/datanode02_data:/opt/hadoop/dfs/data
+      - ./volume/datanode02_yarn:/opt/hadoop/yarn/data
+    command: ["hdfs", "--config", "/etc/hadoop", "datanode"]
+    
+  # datanode03:
+  #   image: hadoop_spark
+  #   container_name: datanode03
+  #   volumes:
+  #     - ./init/core-site.xml:/etc/hadoop/core-site.xml
+  #     - ./init/yarn-site.xml:/etc/hadoop/yarn-site.xml
+  #     - ./volume/datanode03_data:/opt/hadoop/dfs/data
+  #     - ./volume/datanode03_yarn:/opt/hadoop/yarn/data
+  #   command: ["hdfs", "--config", "/etc/hadoop", "datanode"]
+
+  # ==============================================================================
+
+  resourcemanager:
+    image: hadoop_spark
+    container_name: resourcemanager
+    ports:
+      - 8088:8088 # resourcemanager web UI
+      - 18080:18080 # spark-history-server web UI
+    volumes:
+      - ./init/core-site.xml:/etc/hadoop/core-site.xml
+    command: 
+      - /bin/sh
+      - -c
+      - | 
+        /opt/spark/sbin/start-history-server.sh &&
+        yarn --config /etc/hadoop resourcemanager
+
+  yarntimeline:
+    image: hadoop_spark
+    container_name: yarntimeline
+    ports:
+      - 8188:8188 # yarntimeline web UI
+    volumes:
+      - ./init/core-site.xml:/etc/hadoop/core-site.xml
+      - ./volume/namenode_hadoop_timeline:/opt/hadoop/yarn/timeline
+    command: [ "yarn", "--config", "/etc/hadoop", "timelineserver" ]
+    
+  nodemanager01:
+    image: hadoop_spark
+    container_name: nodemanager01
+    volumes:
+      - ./init/core-site.xml:/etc/hadoop/core-site.xml
+      - ./init/yarn-site.xml:/etc/hadoop/yarn-site.xml
+      - ./volume/namenode_spark_eventLog:/opt/spark/eventLog # spark history log data mount 
+      # - ./volume/nodemanager01/nm-local-dir:/tmp/hadoop-root/nm-local-dir
+      # - ./volume/nodemanager01/userlogs:/opt/hadoop/logs/userlogs
+    command: ["yarn", "--config", "/etc/hadoop", "nodemanager"]
+    
+  nodemanager02:
+    image: hadoop_spark
+    container_name: nodemanager02
+    volumes:
+      - ./init/core-site.xml:/etc/hadoop/core-site.xml
+      - ./init/yarn-site.xml:/etc/hadoop/yarn-site.xml
+      - ./volume/namenode_spark_eventLog:/opt/spark/eventLog # spark history log data mount 
+      # - ./volume/nodemanager02/nm-local-dir:/tmp/hadoop-root/nm-local-dir
+      # - ./volume/nodemanager02/userlogs:/opt/hadoop/logs/userlogs
+    command: ["yarn", "--config", "/etc/hadoop", "nodemanager"]
+    
+  # nodemanager03:
+  #   image: hadoop_spark
+  #   container_name: nodemanager03
+  #   volumes:
+  #     - ./init/core-site.xml:/etc/hadoop/core-site.xml
+  #     - ./init/yarn-site.xml:/etc/hadoop/yarn-site.xml
+  #     - ./volume/namenode_spark_eventLog:/opt/spark/eventLog # spark history log data mount 
+  #     # - ./volume/nodemanager03/nm-local-dir:/tmp/hadoop-root/nm-local-dir
+  #     # - ./volume/nodemanager03/userlogs:/opt/hadoop/logs/userlogs
+  #   command: ["yarn", "--config", "/etc/hadoop", "nodemanager"]

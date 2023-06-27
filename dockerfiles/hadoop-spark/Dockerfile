@@ -46,6 +46,3 @@ RUN mkdir $SPARK_HOME/eventLog
 
 # copy spark config file
 ADD spark-defaults.conf $SPARK_HOME/conf
-
-# iceberg
-ADD iceberg-spark-runtime-3.4_2.12-1.3.0.jar $SPARK_HOME/jars/iceberg-spark-runtime-3.4_2.12-1.3.0.jar

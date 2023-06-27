@@ -12,17 +12,8 @@ services:
       - ./volume/namenode_name:/opt/hadoop/dfs/name # namenode data mount
       - ./volume/namenode_spark_eventLog:/opt/spark/eventLog # spark history log data mount 
       - ./volume/namenode_hadoop_timeline:/opt/hadoop/yarn/timeline # yarn timeline data mount
-    # command: 
-    #   - /bin/bash
-    #   - -c
-    #   - |
-    #     if test -f "$NAMENODE_VERSION"; then
-    #         echo "$NAMENODE_VERSION exists."
-    #     else
-    #         echo "$NAMENODE_VERSION dosen't exists."
-    #         echo 'Y' | hdfs namenode -format
-    #     fi
-    #     hdfs --config /etc/hadoop namenode
+      - ./init/$ICEBERG_SPARK_RUNTIME_JAR:$SPARK_HOME/jars/$ICEBERG_SPARK_RUNTIME_JAR
+      - ./init/$SPARK_SQL_KAFKA_JAR:$SPARK_HOME/jars/$SPARK_SQL_KAFKA_JAR
 
   # ==============================================================================
     
@@ -34,6 +25,8 @@ services:
       - ./init/yarn-site.xml:/etc/hadoop/yarn-site.xml
       - ./volume/datanode01_data:/opt/hadoop/dfs/data
       - ./volume/datanode01_yarn:/opt/hadoop/yarn/data
+      - ./init/$ICEBERG_SPARK_RUNTIME_JAR:$SPARK_HOME/jars/$ICEBERG_SPARK_RUNTIME_JAR
+      - ./init/$SPARK_SQL_KAFKA_JAR:$SPARK_HOME/jars/$SPARK_SQL_KAFKA_JAR
     command: ["hdfs", "--config", "/etc/hadoop", "datanode"]
     
   datanode02:
@@ -44,6 +37,8 @@ services:
       - ./init/yarn-site.xml:/etc/hadoop/yarn-site.xml
       - ./volume/datanode02_data:/opt/hadoop/dfs/data
       - ./volume/datanode02_yarn:/opt/hadoop/yarn/data
+      - ./init/$ICEBERG_SPARK_RUNTIME_JAR:$SPARK_HOME/jars/$ICEBERG_SPARK_RUNTIME_JAR
+      - ./init/$SPARK_SQL_KAFKA_JAR:$SPARK_HOME/jars/$SPARK_SQL_KAFKA_JAR
     command: ["hdfs", "--config", "/etc/hadoop", "datanode"]
     
   # datanode03:
@@ -90,6 +85,8 @@ services:
       - ./init/core-site.xml:/etc/hadoop/core-site.xml
       - ./init/yarn-site.xml:/etc/hadoop/yarn-site.xml
       - ./volume/namenode_spark_eventLog:/opt/spark/eventLog # spark history log data mount 
+      - ./init/$ICEBERG_SPARK_RUNTIME_JAR:$SPARK_HOME/jars/$ICEBERG_SPARK_RUNTIME_JAR
+      - ./init/$SPARK_SQL_KAFKA_JAR:$SPARK_HOME/jars/$SPARK_SQL_KAFKA_JAR
       # - ./volume/nodemanager01/nm-local-dir:/tmp/hadoop-root/nm-local-dir
       # - ./volume/nodemanager01/userlogs:/opt/hadoop/logs/userlogs
     command: ["yarn", "--config", "/etc/hadoop", "nodemanager"]
@@ -101,6 +98,8 @@ services:
       - ./init/core-site.xml:/etc/hadoop/core-site.xml
       - ./init/yarn-site.xml:/etc/hadoop/yarn-site.xml
       - ./volume/namenode_spark_eventLog:/opt/spark/eventLog # spark history log data mount 
+      - ./init/$ICEBERG_SPARK_RUNTIME_JAR:$SPARK_HOME/jars/$ICEBERG_SPARK_RUNTIME_JAR
+      - ./init/$SPARK_SQL_KAFKA_JAR:$SPARK_HOME/jars/$SPARK_SQL_KAFKA_JAR
       # - ./volume/nodemanager02/nm-local-dir:/tmp/hadoop-root/nm-local-dir
       # - ./volume/nodemanager02/userlogs:/opt/hadoop/logs/userlogs
     command: ["yarn", "--config", "/etc/hadoop", "nodemanager"]
@@ -112,6 +111,8 @@ services:
   #     - ./init/core-site.xml:/etc/hadoop/core-site.xml
   #     - ./init/yarn-site.xml:/etc/hadoop/yarn-site.xml
   #     - ./volume/namenode_spark_eventLog:/opt/spark/eventLog # spark history log data mount 
+  #     # - ./init/$ICEBERG_SPARK_RUNTIME_JAR:$SPARK_HOME/jars/$ICEBERG_SPARK_RUNTIME_JAR
+  #     # - ./init/$SPARK_SQL_KAFKA_JAR:$SPARK_HOME/jars/$SPARK_SQL_KAFKA_JAR
   #     # - ./volume/nodemanager03/nm-local-dir:/tmp/hadoop-root/nm-local-dir
   #     # - ./volume/nodemanager03/userlogs:/opt/hadoop/logs/userlogs
   #   command: ["yarn", "--config", "/etc/hadoop", "nodemanager"]

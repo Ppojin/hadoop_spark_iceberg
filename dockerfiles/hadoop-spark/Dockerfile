@@ -1,9 +1,7 @@
 FROM hadoop
 
-# RUN yum install -y wget openssl-devel bzip2-devel libffi-devel
-# RUN yum groupinstall -y "Development Tools"
-
 RUN apt-get install -y build-essential zlib1g-dev libffi-dev
+RUN apt-get install -y libreadline-gplv2-dev libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev
 
 ARG PYTHON_VERSION_MIJOR=3
 ARG PYTHON_VERSION_MINOR=$PYTHON_VERSION_MIJOR.10

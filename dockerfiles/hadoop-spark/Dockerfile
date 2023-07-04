@@ -44,3 +44,6 @@ RUN mkdir $SPARK_HOME/eventLog
 
 # copy spark config file
 ADD spark-defaults.conf $SPARK_HOME/conf
+
+ADD notebook.sh .
+RUN chmod a+x ./notebook.sh

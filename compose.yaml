@@ -14,6 +14,8 @@ services:
       - ./volume/namenode_hadoop_timeline:/opt/hadoop/yarn/timeline # yarn timeline data mount
       - ./init/$ICEBERG_SPARK_RUNTIME_JAR:$SPARK_HOME/jars/$ICEBERG_SPARK_RUNTIME_JAR
       - ./init/$SPARK_SQL_KAFKA_JAR:$SPARK_HOME/jars/$SPARK_SQL_KAFKA_JAR
+      - ./volume/namenode_jar:/root/.ivy2
+      - ./volume/namenode_py:/root/site-packages
       - ./demo:/notebook
     networks:
       - hadoop

@@ -1,5 +1,16 @@
 
 services:
+  # asciiArt Font : Nancyj
+  # ==============================================================================
+  #   dP                      dP                            
+  #   88                      88                            
+  #   88d888b. .d8888b. .d888b88 .d8888b. .d8888b. 88d888b. 
+  #   88'  `88 88'  `88 88'  `88 88'  `88 88'  `88 88'  `88 
+  #   88    88 88.  .88 88.  .88 88.  .88 88.  .88 88.  .88 
+  #   dP    dP `88888P8 `88888P8 `88888P' `88888P' 88Y888P' 
+  #                                                88       
+  #                                                dP       
+  # ==============================================================================
   namenode:
     image: hadoop_spark
     container_name: namenode
@@ -9,11 +20,12 @@ services:
     volumes:
       - ./init/core-site.xml:/etc/hadoop/core-site.xml
       - ./init/yarn-site.xml:/etc/hadoop/yarn-site.xml
+      - ./init/jars/$POSTGRESQL_JAR:$SPARK_HOME/jars/$POSTGRESQL_JAR
+      - ./init/jars/$ICEBERG_SPARK_RUNTIME_JAR:$SPARK_HOME/jars/$ICEBERG_SPARK_RUNTIME_JAR
+      - ./init/jars/$SPARK_SQL_KAFKA_JAR:$SPARK_HOME/jars/$SPARK_SQL_KAFKA_JAR
       - ./volume/namenode_name:/opt/hadoop/dfs/name # namenode data mount
       - ./volume/namenode_spark_eventLog:/opt/spark/eventLog # spark history log data mount 
       - ./volume/namenode_hadoop_timeline:/opt/hadoop/yarn/timeline # yarn timeline data mount
-      - ./init/$ICEBERG_SPARK_RUNTIME_JAR:$SPARK_HOME/jars/$ICEBERG_SPARK_RUNTIME_JAR
-      - ./init/$SPARK_SQL_KAFKA_JAR:$SPARK_HOME/jars/$SPARK_SQL_KAFKA_JAR
       - ./volume/namenode_jar:/root/.ivy2
       - ./volume/namenode_py:/root/site-packages
       - ./demo:/notebook
@@ -21,17 +33,30 @@ services:
       - hadoop
 
   # ==============================================================================
+  #         dP            dP                                    dP          
+  #         88            88                                    88          
+  #   .d888b88 .d8888b. d8888P .d8888b. 88d888b. .d8888b. .d888b88 .d8888b. 
+  #   88'  `88 88'  `88   88   88'  `88 88'  `88 88'  `88 88'  `88 88ooood8 
+  #   88.  .88 88.  .88   88   88.  .88 88    88 88.  .88 88.  .88 88.  ... 
+  #   `88888P8 `88888P8   dP   `88888P8 dP    dP `88888P' `88888P8 `88888P' 
+  #                                                                         
+  #                                                                         
+  # ==============================================================================
     
   datanode01:
     image: hadoop_spark
     container_name: datanode01
+    ports:
+      - 19864:19864
     volumes:
       - ./init/core-site.xml:/etc/hadoop/core-site.xml
       - ./init/yarn-site.xml:/etc/hadoop/yarn-site.xml
+      - ./init/hdfs-site_datanode01.xml:/etc/hadoop/hdfs-site.xml
+      - ./init/jars/$POSTGRESQL_JAR:/jars/$POSTGRESQL_JAR
+      - ./init/jars/$ICEBERG_SPARK_RUNTIME_JAR:$SPARK_HOME/jars/$ICEBERG_SPARK_RUNTIME_JAR
+      - ./init/jars/$SPARK_SQL_KAFKA_JAR:$SPARK_HOME/jars/$SPARK_SQL_KAFKA_JAR
       - ./volume/datanode01_data:/opt/hadoop/dfs/data
       - ./volume/datanode01_yarn:/opt/hadoop/yarn/data
-      - ./init/$ICEBERG_SPARK_RUNTIME_JAR:$SPARK_HOME/jars/$ICEBERG_SPARK_RUNTIME_JAR
-      - ./init/$SPARK_SQL_KAFKA_JAR:$SPARK_HOME/jars/$SPARK_SQL_KAFKA_JAR
     command: ["hdfs", "--config", "/etc/hadoop", "datanode"]
     networks:
       - hadoop
@@ -39,13 +64,17 @@ services:
   datanode02:
     image: hadoop_spark
     container_name: datanode02
+    ports:
+      - 29864:29864
     volumes:
       - ./init/core-site.xml:/etc/hadoop/core-site.xml
       - ./init/yarn-site.xml:/etc/hadoop/yarn-site.xml
+      - ./init/hdfs-site_datanode02.xml:/etc/hadoop/hdfs-site.xml
+      - ./init/jars/$POSTGRESQL_JAR:/jars/$POSTGRESQL_JAR
+      - ./init/jars/$ICEBERG_SPARK_RUNTIME_JAR:$SPARK_HOME/jars/$ICEBERG_SPARK_RUNTIME_JAR
+      - ./init/jars/$SPARK_SQL_KAFKA_JAR:$SPARK_HOME/jars/$SPARK_SQL_KAFKA_JAR
       - ./volume/datanode02_data:/opt/hadoop/dfs/data
       - ./volume/datanode02_yarn:/opt/hadoop/yarn/data
-      - ./init/$ICEBERG_SPARK_RUNTIME_JAR:$SPARK_HOME/jars/$ICEBERG_SPARK_RUNTIME_JAR
-      - ./init/$SPARK_SQL_KAFKA_JAR:$SPARK_HOME/jars/$SPARK_SQL_KAFKA_JAR
     command: ["hdfs", "--config", "/etc/hadoop", "datanode"]
     networks:
       - hadoop
@@ -62,6 +91,15 @@ services:
   #   networks:
   #     - hadoop
 
+  # ==============================================================================
+  #                                       
+  #                                       
+  #   dP    dP .d8888b. 88d888b. 88d888b. 
+  #   88    88 88'  `88 88'  `88 88'  `88 
+  #   88.  .88 88.  .88 88       88    88 
+  #   `8888P88 `88888P8 dP       dP    dP 
+  #       .88                            
+  #   d8888P                             
   # ==============================================================================
 
   resourcemanager:
@@ -100,8 +138,9 @@ services:
       - ./init/core-site.xml:/etc/hadoop/core-site.xml
       - ./init/yarn-site.xml:/etc/hadoop/yarn-site.xml
       - ./volume/namenode_spark_eventLog:/opt/spark/eventLog # spark history log data mount 
-      - ./init/$ICEBERG_SPARK_RUNTIME_JAR:$SPARK_HOME/jars/$ICEBERG_SPARK_RUNTIME_JAR
-      - ./init/$SPARK_SQL_KAFKA_JAR:$SPARK_HOME/jars/$SPARK_SQL_KAFKA_JAR
+      - ./init/jars/$POSTGRESQL_JAR:/jars/$POSTGRESQL_JAR
+      - ./init/jars/$ICEBERG_SPARK_RUNTIME_JAR:$SPARK_HOME/jars/$ICEBERG_SPARK_RUNTIME_JAR
+      - ./init/jars/$SPARK_SQL_KAFKA_JAR:$SPARK_HOME/jars/$SPARK_SQL_KAFKA_JAR
       # - ./volume/nodemanager01/nm-local-dir:/tmp/hadoop-root/nm-local-dir
       # - ./volume/nodemanager01/userlogs:/opt/hadoop/logs/userlogs
     command: ["yarn", "--config", "/etc/hadoop", "nodemanager"]
@@ -115,8 +154,9 @@ services:
       - ./init/core-site.xml:/etc/hadoop/core-site.xml
       - ./init/yarn-site.xml:/etc/hadoop/yarn-site.xml
       - ./volume/namenode_spark_eventLog:/opt/spark/eventLog # spark history log data mount 
-      - ./init/$ICEBERG_SPARK_RUNTIME_JAR:$SPARK_HOME/jars/$ICEBERG_SPARK_RUNTIME_JAR
-      - ./init/$SPARK_SQL_KAFKA_JAR:$SPARK_HOME/jars/$SPARK_SQL_KAFKA_JAR
+      - ./init/jars/$POSTGRESQL_JAR:/jars/$POSTGRESQL_JAR
+      - ./init/jars/$ICEBERG_SPARK_RUNTIME_JAR:$SPARK_HOME/jars/$ICEBERG_SPARK_RUNTIME_JAR
+      - ./init/jars/$SPARK_SQL_KAFKA_JAR:$SPARK_HOME/jars/$SPARK_SQL_KAFKA_JAR
       # - ./volume/nodemanager02/nm-local-dir:/tmp/hadoop-root/nm-local-dir
       # - ./volume/nodemanager02/userlogs:/opt/hadoop/logs/userlogs
     command: ["yarn", "--config", "/etc/hadoop", "nodemanager"]
@@ -130,8 +170,9 @@ services:
   #     - ./init/core-site.xml:/etc/hadoop/core-site.xml
   #     - ./init/yarn-site.xml:/etc/hadoop/yarn-site.xml
   #     - ./volume/namenode_spark_eventLog:/opt/spark/eventLog # spark history log data mount 
-  #     # - ./init/$ICEBERG_SPARK_RUNTIME_JAR:$SPARK_HOME/jars/$ICEBERG_SPARK_RUNTIME_JAR
-  #     # - ./init/$SPARK_SQL_KAFKA_JAR:$SPARK_HOME/jars/$SPARK_SQL_KAFKA_JAR
+  #     - ./init/jars/$POSTGRESQL_JAR:/jars/$POSTGRESQL_JAR
+  #     - ./init/jars/$ICEBERG_SPARK_RUNTIME_JAR:$SPARK_HOME/jars/$ICEBERG_SPARK_RUNTIME_JAR
+  #     - ./init/jars/$SPARK_SQL_KAFKA_JAR:$SPARK_HOME/jars/$SPARK_SQL_KAFKA_JAR
   #     # - ./volume/nodemanager03/nm-local-dir:/tmp/hadoop-root/nm-local-dir
   #     # - ./volume/nodemanager03/userlogs:/opt/hadoop/logs/userlogs
   #   command: ["yarn", "--config", "/etc/hadoop", "nodemanager"]
@@ -139,7 +180,157 @@ services:
   #     - hadoop
 
   # ==============================================================================
+  #   dP                .8888b dP                
+  #   88                88   " 88                
+  #   88  .dP  .d8888b. 88aaa  88  .dP  .d8888b. 
+  #   88888"   88'  `88 88     88888"   88'  `88 
+  #   88  `8b. 88.  .88 88     88  `8b. 88.  .88 
+  #   dP   `YP `88888P8 dP     dP   `YP `88888P8 
+  #                                              
+  #                                              
+  # ==============================================================================
+  kafka-ui:
+    profiles: [kafka]
+    image: provectuslabs/kafka-ui:v0.7.1
+    container_name: kafka-ui
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: "kafka"
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "kafka1:9092"
+      # KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "kafka1:9092,kafka2:9093,kafka3:9094"
+      KAFKA_CLUSTERS_0_READONLY: "false"
+    networks:
+      - hadoop
 
+  kafka1:
+    profiles: [kafka]
+    container_name: kafka1
+    image: confluentinc/cp-kafka:${KAFKA_VERSION}
+    restart: on-failure
+    ports:
+      - "9092:9092"
+    environment:
+      CLUSTER_ID: xEPu7eYrS2yMk96zLaedVA
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_LISTENERS: INTERNAL://kafka1:29092,CONTROLLER://kafka1:29093,EXTERNAL://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka1:29092,EXTERNAL://kafka1:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka1:29093
+  #     KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka1:29093,2@kafka2:29093,3@kafka3:29093
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_NUM_PARTITIONS: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_DELETE_TOPIC_ENABLE: true
+      KAFKA_LOG4J_LOGGERS: org.apache.kafka.image.loader.MetadataLoader=WARN
+      KAFKA_LOG_DIRS: /data/kafka
+    volumes:
+      - ./volume/kafka1_data:/data/kafka/
+    networks:
+      - hadoop
+
+  # kafka2:
+  #   profiles: [kafka]
+  #   container_name: kafka2
+  #   image: confluentinc/cp-kafka:${KAFKA_VERSION}
+  #   restart: on-failure
+  #   ports:
+  #     - "9093:9092"
+  #   environment:
+  #     CLUSTER_ID: xEPu7eYrS2yMk96zLaedVA
+  #     KAFKA_NODE_ID: 2
+  #     KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+  #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+  #     KAFKA_LISTENERS: INTERNAL://kafka2:29092,CONTROLLER://kafka2:29093,EXTERNAL://0.0.0.0:9093
+  #     KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka2:29092,EXTERNAL://kafka2:9093
+  #     KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+  #     KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka1:29093,2@kafka2:29093,3@kafka3:29093
+  #     KAFKA_PROCESS_ROLES: broker,controller
+  #     KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+  #     KAFKA_NUM_PARTITIONS: 1
+  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  #     KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+  #     KAFKA_DELETE_TOPIC_ENABLE: true
+  #     KAFKA_LOG4J_LOGGERS: org.apache.kafka.image.loader.MetadataLoader=WARN
+  #     KAFKA_LOG_DIRS: /data/kafka
+  #   volumes:
+  #     - ./volume/kafka2_data:/data/kafka/
+  #   networks:
+  #     - hadoop
+
+  # kafka3:
+  #   profiles: [kafka]
+  #   container_name: kafka3
+  #   image: confluentinc/cp-kafka:${KAFKA_VERSION}
+  #   restart: on-failure
+  #   ports:
+  #     - "9094:9092"
+  #   environment:
+  #     CLUSTER_ID: xEPu7eYrS2yMk96zLaedVA
+  #     KAFKA_NODE_ID: 3
+  #     KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+  #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+  #     KAFKA_LISTENERS: INTERNAL://kafka3:29092,CONTROLLER://kafka3:29093,EXTERNAL://0.0.0.0:9094
+  #     KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka3:29092,EXTERNAL://kafka3:9094
+  #     KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+  #     KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka1:29093,2@kafka2:29093,3@kafka3:29093
+  #     KAFKA_PROCESS_ROLES: broker,controller
+  #     KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+  #     KAFKA_NUM_PARTITIONS: 1
+  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  #     KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+  #     KAFKA_DELETE_TOPIC_ENABLE: true
+  #     KAFKA_LOG4J_LOGGERS: org.apache.kafka.image.loader.MetadataLoader=WARN
+  #     KAFKA_LOG_DIRS: /data/kafka
+  #   volumes:
+  #     - ./volume/kafka3_data:/data/kafka/
+  #   networks:
+  #     - hadoop
+
+  # ==============================================================================
+  #                                dP                                       
+  #                                88                                       
+  #   88d888b. .d8888b. .d8888b. d8888P .d8888b. 88d888b. .d8888b. .d8888b. 
+  #   88'  `88 88'  `88 Y8ooooo.   88   88'  `88 88'  `88 88ooood8 Y8ooooo. 
+  #   88.  .88 88.  .88       88   88   88.  .88 88       88.  ...       88 
+  #   88Y888P' `88888P' `88888P'   dP   `8888P88 dP       `88888P' `88888P' 
+  #   88                                     .88                            
+  #   dP                                 d8888P                             
+  # ==============================================================================
+
+
+  postgres:
+    profiles: [postgres]
+    container_name: postgres
+    image: postgres:13.5-alpine
+    # restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - '5432:5432'
+    volumes: 
+      - ./volume/pgdata:/var/lib/postgresql/data
+      - ./init/pg.sql:/docker-entrypoint-initdb.d/create_tables.sql
+    command: [ "postgres", "-c", "wal_level=logical" ]
+    networks:
+      - hadoop
+
+
+  # ==============================================================================
+  #                       dP                                dP       
+  #                       88                                88       
+  #   88d888b. .d8888b. d8888P dP  dP  dP .d8888b. 88d888b. 88  .dP  
+  #   88'  `88 88ooood8   88   88  88  88 88'  `88 88'  `88 88888"   
+  #   88    88 88.  ...   88   88.88b.88' 88.  .88 88       88  `8b. 
+  #   dP    dP `88888P'   dP   8888P Y8P  `88888P' dP       dP   `YP 
+  #                                                                  
+  #                                                                  
+  # ==============================================================================
 networks:
   hadoop:
     name: hadoop-nw
